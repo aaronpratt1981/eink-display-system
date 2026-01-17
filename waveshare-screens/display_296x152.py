@@ -104,7 +104,7 @@ def handle_request(conn):
                 hd = True; he = req.find(b'\r\n\r\n'); headers = req[:he]; body = req[he + 4:]
                 for line in headers.split(b'\r\n'):
                     if line.startswith(b'Content-Length:'): cl = int(line.split(b':')[1].strip()); break
-                if b'POST /update' not in headers: conn.send(b"HTTP/1.1 200 OK\r\n\r\nOK"); return
+                if b'POST /update' not in headers: conn.send(f"HTTP/1.1 200 OK\r\n\r\nEINK {DISPLAY_WIDTH}x{DISPLAY_HEIGHT} BWR".encode()); return
         while len(body) < cl:
             chunk = conn.recv(min(1024, cl - len(body)))
             if not chunk: break

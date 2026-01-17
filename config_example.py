@@ -105,6 +105,18 @@ plugins = {
             'symbols': ['AAPL', 'GOOGL', 'MSFT', 'TSLA']
         }
     },
+
+    # Screen Status Plugin - shows status of all displays
+    # Note: Requires server reference, added in main.py after server is created
+    # 'screen_status': {
+    #     'class': 'plugins.screen_status.ScreenStatusPlugin',
+    #     'config': {
+    #         'server': None,  # Set to server instance in main.py
+    #         'timeout': 3,    # Seconds to wait for each display
+    #         'show_ip': True,
+    #         'title': 'Display Status'
+    #     }
+    # },
 }
 
 

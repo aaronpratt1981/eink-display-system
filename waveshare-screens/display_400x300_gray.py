@@ -268,13 +268,7 @@ def handle_request(conn, addr):
                         break
 
                 if b'POST /update' not in headers:
-                    response = (
-                        "HTTP/1.1 200 OK\r\n\r\n"
-                        f"Generic E-ink ({DISPLAY_WIDTH}x{DISPLAY_HEIGHT} Grayscale)\n"
-                        f"B&W: {EXPECTED_BYTES_BW}B or Gray: {EXPECTED_BYTES_GRAY}B\n"
-                        "POST to /update"
-                    )
-                    conn.send(response.encode())
+                    conn.send(f"HTTP/1.1 200 OK\r\n\r\nEINK {DISPLAY_WIDTH}x{DISPLAY_HEIGHT} GRAY".encode())
                     return
 
         if not headers_done or content_length == 0:

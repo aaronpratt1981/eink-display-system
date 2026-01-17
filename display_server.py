@@ -50,18 +50,57 @@ class Display:
         return f"Display({self.name}, {self.width}x{self.height} {colors} @ {self.ip})"
 
 
+class UpdateRecord:
+    """Tracks update history for a display"""
+
+    def __init__(self):
+        self.last_attempt: Optional[datetime] = None
+        self.last_success: Optional[datetime] = None
+        self.last_error: Optional[datetime] = None
+        self.last_error_message: Optional[str] = None
+        self.success_count: int = 0
+        self.error_count: int = 0
+
+    def record_success(self):
+        """Record a successful update"""
+        now = datetime.now()
+        self.last_attempt = now
+        self.last_success = now
+        self.success_count += 1
+
+    def record_error(self, error_message: str):
+        """Record a failed update"""
+        now = datetime.now()
+        self.last_attempt = now
+        self.last_error = now
+        self.last_error_message = error_message
+        self.error_count += 1
+
+    def to_dict(self) -> Dict:
+        """Convert to dictionary for JSON serialization"""
+        return {
+            'last_attempt': self.last_attempt.isoformat() if self.last_attempt else None,
+            'last_success': self.last_success.isoformat() if self.last_success else None,
+            'last_error': self.last_error.isoformat() if self.last_error else None,
+            'last_error_message': self.last_error_message,
+            'success_count': self.success_count,
+            'error_count': self.error_count
+        }
+
+
 class DisplayServer:
     """
     Main display server
     Manages displays and routes content from plugins
     """
-    
+
     def __init__(self, output_dir: Path = None):
         self.displays: Dict[str, Display] = {}
         self.plugins: Dict[str, Any] = {}
+        self.update_history: Dict[str, UpdateRecord] = {}
         self.output_dir = output_dir or Path(__file__).parent / "output"
         self.output_dir.mkdir(exist_ok=True)
-        
+
         logger.info("=" * 70)
         logger.info("E-ink Display Server - Plugin Architecture")
         logger.info("=" * 70)
@@ -72,6 +111,7 @@ class DisplayServer:
         """Register a display"""
         display = Display(name, ip, port, width, height, tricolor, grayscale)
         self.displays[name] = display
+        self.update_history[name] = UpdateRecord()
         logger.info(f"Registered display: {display}")
     
     def load_plugin(self, name: str, plugin_class: str, config: Dict = None):
@@ -255,7 +295,7 @@ class DisplayServer:
     def send_to_display(self, display_name: str, binary_data: bytes):
         """
         Send binary data to display via HTTP
-        
+
         Args:
             display_name: Name of display
             binary_data: Binary image data
@@ -263,29 +303,35 @@ class DisplayServer:
         if display_name not in self.displays:
             logger.error(f"Display not found: {display_name}")
             return False
-        
+
         display = self.displays[display_name]
+        history = self.update_history[display_name]
         url = f"http://{display.ip}:{display.port}/update"
-        
+
         try:
             logger.info(f"[{display.name}] Sending {len(binary_data)} bytes to {display.ip}...")
-            
+
             response = requests.post(
                 url,
                 data=binary_data,
                 headers={'Content-Type': 'application/octet-stream'},
                 timeout=30
             )
-            
+
             if response.status_code == 200:
                 display.last_update = datetime.now()
+                history.record_success()
                 logger.info(f"[{display.name}] ✓ Update successful!")
                 return True
             else:
-                logger.error(f"[{display.name}] HTTP {response.status_code}: {response.text}")
+                error_msg = f"HTTP {response.status_code}: {response.text}"
+                history.record_error(error_msg)
+                logger.error(f"[{display.name}] {error_msg}")
                 return False
-                
+
         except requests.exceptions.RequestException as e:
+            error_msg = str(e)
+            history.record_error(error_msg)
             logger.error(f"[{display.name}] Failed to connect: {e}")
             return False
     
@@ -355,7 +401,95 @@ class DisplayServer:
         
         else:
             logger.error(f"Unknown schedule format: {interval}")
-    
+
+    def get_update_history(self, display_name: str = None) -> Dict:
+        """
+        Get update history for one or all displays
+
+        Args:
+            display_name: Optional display name. If None, returns all.
+
+        Returns:
+            Dictionary with update history
+        """
+        if display_name:
+            if display_name in self.update_history:
+                return {display_name: self.update_history[display_name].to_dict()}
+            return {}
+        return {name: record.to_dict() for name, record in self.update_history.items()}
+
+    def query_display_status(self, display_name: str, timeout: float = 3.0) -> Dict:
+        """
+        Query a display's current status via HTTP GET
+
+        Args:
+            display_name: Name of display to query
+            timeout: Connection timeout in seconds
+
+        Returns:
+            Dictionary with online status, resolution, color mode, latency
+        """
+        if display_name not in self.displays:
+            return {'error': 'Display not found'}
+
+        display = self.displays[display_name]
+        url = f"http://{display.ip}:{display.port}/"
+
+        result = {
+            'name': display_name,
+            'ip': display.ip,
+            'port': display.port,
+            'configured_resolution': f"{display.width}x{display.height}",
+            'configured_mode': 'GRAY' if display.grayscale else ('BWR' if display.tricolor else 'BW'),
+            'online': False,
+            'reported_resolution': None,
+            'reported_mode': None,
+            'latency_ms': None,
+            'error': None
+        }
+
+        try:
+            import time
+            start = time.time()
+            response = requests.get(url, timeout=timeout)
+            latency = (time.time() - start) * 1000
+
+            if response.status_code == 200:
+                result['online'] = True
+                result['latency_ms'] = round(latency, 1)
+
+                # Parse response: "EINK 800x480 BWR"
+                text = response.text.strip()
+                if text.startswith('EINK '):
+                    parts = text.split()
+                    if len(parts) >= 3:
+                        result['reported_resolution'] = parts[1]
+                        result['reported_mode'] = parts[2]
+            else:
+                result['error'] = f"HTTP {response.status_code}"
+
+        except requests.exceptions.Timeout:
+            result['error'] = "Timeout"
+        except requests.exceptions.ConnectionError:
+            result['error'] = "Connection refused"
+        except Exception as e:
+            result['error'] = str(e)
+
+        return result
+
+    def get_all_display_status(self, timeout: float = 3.0) -> Dict[str, Dict]:
+        """
+        Query status of all configured displays
+
+        Args:
+            timeout: Connection timeout per display
+
+        Returns:
+            Dictionary mapping display names to their status
+        """
+        return {name: self.query_display_status(name, timeout)
+                for name in self.displays}
+
     def run(self):
         """Run the display server (blocking)"""
         logger.info("\n" + "="*70)

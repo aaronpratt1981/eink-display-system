@@ -142,7 +142,7 @@ def handle_request(conn):
                         break
                 
                 if b'POST /update' not in headers:
-                    conn.send(b"HTTP/1.1 200 OK\r\n\r\nOK")
+                    conn.send(f"HTTP/1.1 200 OK\r\n\r\nEINK {DISPLAY_WIDTH}x{DISPLAY_HEIGHT} BWR".encode())
                     return
         
         while len(body) < cl:
