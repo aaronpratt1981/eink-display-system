@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Configuration files with secrets
+config.py
+.env
+
+# Generated/output files
+output/
+*.png
+*.jpg
+*.jpeg
+*.bin
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# MicroPython
+.picoweb/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# User data
+photos/
+cache/
