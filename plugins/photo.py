@@ -6,6 +6,7 @@ Displays photos from a directory with optional rotation
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
+from typing import Dict, Any, Optional
 import random
 from .base import ContentPlugin, PluginError
 
@@ -24,34 +25,34 @@ class PhotoFramePlugin(ContentPlugin):
         - fit_mode: 'contain' or 'cover' (default: contain)
     """
     
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(config)
-        
+
         photo_dir = config.get('photo_dir', 'photos')
         self.photo_dir = Path(photo_dir)
-        
+
         if not self.photo_dir.exists():
             raise PluginError(f"Photo directory not found: {self.photo_dir}")
-        
+
         self.mode = config.get('mode', 'sequential')
         self.show_caption = config.get('show_caption', True)
         self.fit_mode = config.get('fit_mode', 'contain')
-        
+
         # Get list of image files
         self.photos = []
         for ext in ['*.jpg', '*.jpeg', '*.png', '*.gif']:
             self.photos.extend(self.photo_dir.glob(ext))
             self.photos.extend(self.photo_dir.glob(ext.upper()))
-        
+
         if not self.photos:
             raise PluginError(f"No photos found in {self.photo_dir}")
-        
+
         self.photos.sort()
         self.current_index = 0
-        
-        print(f"Loaded {len(self.photos)} photos from {self.photo_dir}")
-    
-    def get_description(self):
+
+        self.logger.info(f"Loaded {len(self.photos)} photos from {self.photo_dir}")
+
+    def get_description(self) -> str:
         return f"Photo frame ({len(self.photos)} photos)"
     
     def get_next_photo(self):
@@ -100,7 +101,7 @@ class PhotoFramePlugin(ContentPlugin):
         """Generate photo frame display"""
         # Get next photo
         photo_path = self.get_next_photo()
-        print(f"Displaying: {photo_path.name}")
+        self.logger.info(f"Displaying: {photo_path.name}")
         
         # Load and fit image
         photo = Image.open(photo_path)
@@ -113,7 +114,7 @@ class PhotoFramePlugin(ContentPlugin):
             
             try:
                 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
-            except:
+            except Exception:
                 font = ImageFont.load_default()
             
             # Draw caption background

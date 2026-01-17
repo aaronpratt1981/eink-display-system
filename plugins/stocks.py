@@ -6,6 +6,7 @@ Displays stock market information
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
+from typing import Dict, Any, Optional
 from .base import ContentPlugin
 
 
@@ -22,16 +23,16 @@ class StockTickerPlugin(ContentPlugin):
         - update_interval: Minutes between updates (default: 15)
     """
     
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(config)
-        
+
         self.symbols = config.get('symbols', ['AAPL', 'GOOGL', 'MSFT', 'TSLA'])
         self.show_charts = config.get('show_charts', False)
-        
+
         # TODO: Add actual stock API integration (Alpha Vantage, Yahoo Finance, etc.)
         # For now, this is a mock implementation
-    
-    def get_description(self):
+
+    def get_description(self) -> str:
         return f"Stock ticker ({len(self.symbols)} symbols)"
     
     def fetch_stock_data(self):
@@ -71,7 +72,7 @@ class StockTickerPlugin(ContentPlugin):
             symbol_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 32)
             price_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 28)
             info_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
-        except:
+        except Exception:
             title_font = ImageFont.load_default()
             symbol_font = ImageFont.load_default()
             price_font = ImageFont.load_default()

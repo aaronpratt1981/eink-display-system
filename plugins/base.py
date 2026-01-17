@@ -22,13 +22,33 @@ class ContentPlugin(ABC):
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
         Initialize plugin with optional configuration
-        
+
         Args:
             config: Dictionary of plugin-specific configuration
         """
         self.config = config or {}
         self.logger = logging.getLogger(self.__class__.__name__)
-    
+
+    def get_name(self) -> str:
+        """
+        Get plugin name
+
+        Returns:
+            Plugin class name
+        """
+        return self.__class__.__name__
+
+    def get_description(self) -> str:
+        """
+        Get plugin description
+
+        Override this method to provide a custom description.
+
+        Returns:
+            Human-readable description of what this plugin does
+        """
+        return getattr(self, 'DESCRIPTION', 'No description')
+
     @abstractmethod
     def generate(self, width: int, height: int, tricolor: bool = False,
                  grayscale: bool = False) -> Image.Image:
@@ -80,14 +100,14 @@ class ContentPlugin(ABC):
     def get_info(self) -> Dict[str, Any]:
         """
         Get plugin information
-        
+
         Returns:
             Dictionary with plugin metadata
         """
         return {
-            'name': self.__class__.__name__,
+            'name': self.get_name(),
             'version': getattr(self, 'VERSION', '1.0.0'),
-            'description': getattr(self, 'DESCRIPTION', 'No description'),
+            'description': self.get_description(),
             'author': getattr(self, 'AUTHOR', 'Unknown'),
             'config': self.config
         }

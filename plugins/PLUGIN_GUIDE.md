@@ -29,40 +29,45 @@ Displayed on e-ink screen
 ```python
 # plugins/hello.py
 
+from typing import Dict, Any, Optional
 from .base import ContentPlugin
 from PIL import Image, ImageDraw, ImageFont
 
 
 class HelloWorldPlugin(ContentPlugin):
     """Simple Hello World plugin"""
-    
-    def get_description(self):
+
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        super().__init__(config)
+
+    def get_description(self) -> str:
         return "Hello World display"
-    
-    def generate(self, width, height, tricolor=False):
+
+    def generate(self, width: int, height: int, tricolor: bool = False,
+                 grayscale: bool = False) -> Image.Image:
         """Generate content image"""
         # Create white background
         image = Image.new('RGB', (width, height), 'white')
         draw = ImageDraw.Draw(image)
-        
+
         # Draw text
         text = "Hello, E-ink World!"
-        
+
         try:
             font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 48)
-        except:
+        except Exception:
             font = ImageFont.load_default()
-        
+
         # Center text
         bbox = draw.textbbox((0, 0), text, font=font)
         text_width = bbox[2] - bbox[0]
         text_height = bbox[3] - bbox[1]
-        
+
         x = (width - text_width) // 2
         y = (height - text_height) // 2
-        
+
         draw.text((x, y), text, fill='black', font=font)
-        
+
         return image
 ```
 
@@ -100,25 +105,32 @@ That's it! Your plugin is live! 🎉
 All plugins inherit from `ContentPlugin`:
 
 ```python
+from typing import Dict, Any, Optional
 from .base import ContentPlugin
+from PIL import Image
 
 class MyPlugin(ContentPlugin):
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(config)
         # Your initialization
-    
-    def generate(self, width, height, tricolor=False):
+
+    def generate(self, width: int, height: int, tricolor: bool = False,
+                 grayscale: bool = False) -> Image.Image:
         # Must return PIL Image (RGB mode)
         pass
-    
-    def get_description(self):
+
+    def get_name(self) -> str:
+        # Return plugin name (defaults to class name)
+        return self.__class__.__name__
+
+    def get_description(self) -> str:
         # Return short description
         return "My plugin"
-    
-    def should_update(self):
+
+    def should_update(self) -> bool:
         # Return True if content needs updating
         return True
-    
+
     def cleanup(self):
         # Cleanup resources when plugin unloads
         pass
@@ -126,21 +138,23 @@ class MyPlugin(ContentPlugin):
 
 ### Required Methods
 
-#### `generate(width, height, tricolor=False) -> Image`
+#### `generate(width, height, tricolor=False, grayscale=False) -> Image`
 
 **Generate content image**
 
 Parameters:
 - `width` (int): Display width in pixels
-- `height` (int): Display height in pixels  
-- `tricolor` (bool): True if display supports red color
+- `height` (int): Display height in pixels
+- `tricolor` (bool): True if display supports red color (B/W/R)
+- `grayscale` (bool): True if display supports 4-level grayscale
 
 Returns:
 - PIL Image object in RGB mode, sized exactly to width × height
 
 Example:
 ```python
-def generate(self, width, height, tricolor=False):
+def generate(self, width: int, height: int, tricolor: bool = False,
+             grayscale: bool = False) -> Image.Image:
     image = Image.new('RGB', (width, height), 'white')
     # ... draw content ...
     return image
@@ -148,12 +162,21 @@ def generate(self, width, height, tricolor=False):
 
 ### Optional Methods
 
+#### `get_name() -> str`
+
+Return plugin name. Defaults to class name if not overridden.
+
+```python
+def get_name(self) -> str:
+    return "MyCustomPlugin"
+```
+
 #### `get_description() -> str`
 
 Return human-readable plugin description.
 
 ```python
-def get_description(self):
+def get_description(self) -> str:
     return "Weather forecast with current conditions"
 ```
 
@@ -162,7 +185,7 @@ def get_description(self):
 Return whether content needs regenerating. Use for caching or rate limiting.
 
 ```python
-def should_update(self):
+def should_update(self) -> bool:
     # Only update once per day
     today = datetime.now().date()
     if self.last_update == today:
@@ -202,7 +225,7 @@ draw = ImageDraw.Draw(image)
 # Load font
 try:
     font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 24)
-except:
+except Exception:
     font = ImageFont.load_default()
 
 # Draw text
@@ -293,15 +316,15 @@ Access in plugin:
 
 ```python
 class WeatherPlugin(ContentPlugin):
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(config)
-        
+
         self.location = config.get('location', 'Indianapolis, IN')
         self.units = config.get('units', 'imperial')
         self.api_key = config.get('api_key')
-        
+
         if not self.api_key:
-            raise PluginConfigError("API key required")
+            raise PluginError("API key required")
 ```
 
 ## 📦 Example Plugins
@@ -522,9 +545,9 @@ def generate(self, width, height, tricolor=False):
 
 ```python
 class MyPlugin(ContentPlugin):
-    def __init__(self, config):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(config)
-        
+
         # Provide defaults
         self.refresh_interval = config.get('refresh_interval', 60)
         self.show_icons = config.get('show_icons', True)
@@ -563,29 +586,31 @@ class MyPlugin(ContentPlugin):
 ### Enable Debug Output
 
 ```python
-def generate(self, width, height, tricolor=False):
-    print(f"[MyPlugin] Generating {width}x{height}")
-    print(f"[MyPlugin] Config: {self.config}")
-    
+def generate(self, width: int, height: int, tricolor: bool = False,
+             grayscale: bool = False) -> Image.Image:
+    self.logger.debug(f"Generating {width}x{height}")
+    self.logger.debug(f"Config: {self.config}")
+
     # ... generate ...
-    
-    print(f"[MyPlugin] Generated successfully")
+
+    self.logger.info("Generated successfully")
     return image
 ```
 
 ### Save Debug Images
 
 ```python
-def generate(self, width, height, tricolor=False):
+def generate(self, width: int, height: int, tricolor: bool = False,
+             grayscale: bool = False) -> Image.Image:
     image = Image.new('RGB', (width, height), 'white')
     # ... draw ...
-    
+
     # Save for inspection
     debug_path = Path('debug') / f'{self.get_name()}_{width}x{height}.png'
     debug_path.parent.mkdir(exist_ok=True)
     image.save(debug_path)
-    print(f"Debug image: {debug_path}")
-    
+    self.logger.debug(f"Debug image: {debug_path}")
+
     return image
 ```
 

@@ -6,6 +6,7 @@ Downloads and displays newspaper front page
 from pathlib import Path
 from PIL import Image
 from datetime import datetime
+from typing import Dict, Any, Optional
 import requests
 from .base import ContentPlugin, PluginError
 
@@ -18,22 +19,22 @@ class NewspaperPlugin(ContentPlugin):
     Automatically resizes and rotates for landscape display
     """
     
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(config)
-        
+
         # URL template for newspaper
         self.url_template = config.get(
             'url_template',
             'https://d2dr22b2lm4tvw.cloudfront.net/in_is/{date}/front-page-large.jpg'
         )
-        
+
         self.cache_dir = Path(config.get('cache_dir', 'output/cache'))
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.last_download_date = None
         self.cached_image = None
-    
-    def get_description(self):
+
+    def get_description(self) -> str:
         return "Indianapolis Star newspaper front page"
     
     def should_update(self):
@@ -49,16 +50,16 @@ class NewspaperPlugin(ContentPlugin):
         url = self.url_template.format(date=date_str)
         
         try:
-            print(f"Downloading newspaper: {url}")
+            self.logger.info(f"Downloading newspaper: {url}")
             response = requests.get(url, timeout=30)
             response.raise_for_status()
-            
+
             # Save to cache
             cache_path = self.cache_dir / f"newspaper_{date_str}.jpg"
             with open(cache_path, 'wb') as f:
                 f.write(response.content)
-            
-            print(f"Downloaded {len(response.content)} bytes")
+
+            self.logger.info(f"Downloaded {len(response.content)} bytes")
             
             # Load as image
             image = Image.open(cache_path)
@@ -84,16 +85,16 @@ class NewspaperPlugin(ContentPlugin):
         aspect_ratio = image.height / image.width
         new_height = int(target_height * aspect_ratio)
         image_resized = image.resize((target_height, new_height), Image.LANCZOS)
-        print(f"Resized to: {image_resized.size}")
-        
+        self.logger.debug(f"Resized to: {image_resized.size}")
+
         # Step 2: Crop to target width (will become height after rotation)
         crop_height = min(target_width, image_resized.height)
         image_cropped = image_resized.crop((0, 0, target_height, crop_height))
-        print(f"Cropped to: {image_cropped.size}")
-        
+        self.logger.debug(f"Cropped to: {image_cropped.size}")
+
         # Step 3: Rotate 90° clockwise
         image_rotated = image_cropped.rotate(-90, expand=True)
-        print(f"Rotated to: {image_rotated.size}")
+        self.logger.debug(f"Rotated to: {image_rotated.size}")
         
         # Convert to RGB
         if image_rotated.mode != 'RGB':
@@ -107,7 +108,7 @@ class NewspaperPlugin(ContentPlugin):
         if not self.cached_image or self.should_update():
             image = self.download_newspaper()
         else:
-            print("Using cached newspaper")
+            self.logger.info("Using cached newspaper")
             image = self.cached_image
         
         # Process for display

@@ -7,6 +7,7 @@ from pathlib import Path
 from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from typing import Dict, Any, Optional
 from .base import ContentPlugin, PluginError
 
 
@@ -18,17 +19,17 @@ class WeatherPlugin(ContentPlugin):
     Shows current conditions, temperature, and forecast
     """
     
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(config)
-        
+
         # Get HTML template path
         self.html_path = Path(config.get('html_path', 'weather-display.html'))
         if not self.html_path.exists():
             raise PluginError(f"Weather HTML not found: {self.html_path}")
-        
+
         self.driver = None
-    
-    def get_description(self):
+
+    def get_description(self) -> str:
         return "Current weather conditions with forecast"
     
     def setup_driver(self):
@@ -90,6 +91,6 @@ class WeatherPlugin(ContentPlugin):
         if self.driver:
             try:
                 self.driver.quit()
-            except:
+            except Exception:
                 pass
             self.driver = None

@@ -6,6 +6,7 @@ Displays upcoming events from Google Calendar
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime, timedelta
+from typing import Dict, Any, Optional
 from .base import ContentPlugin
 
 
@@ -22,17 +23,17 @@ class CalendarPlugin(ContentPlugin):
         - max_events: Maximum events to display (default: 10)
     """
     
-    def __init__(self, config=None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(config)
-        
+
         self.calendar_ids = config.get('calendar_ids', ['primary'])
         self.days_ahead = config.get('days_ahead', 7)
         self.max_events = config.get('max_events', 10)
-        
+
         # TODO: Add Google Calendar API authentication
         # For now, this is a mock implementation
-    
-    def get_description(self):
+
+    def get_description(self) -> str:
         return f"Calendar events for next {self.days_ahead} days"
     
     def fetch_events(self):
@@ -64,7 +65,7 @@ class CalendarPlugin(ContentPlugin):
             title_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 36)
             date_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 24)
             event_font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 20)
-        except:
+        except Exception:
             title_font = ImageFont.load_default()
             date_font = ImageFont.load_default()
             event_font = ImageFont.load_default()
