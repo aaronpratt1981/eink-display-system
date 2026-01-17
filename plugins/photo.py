@@ -96,7 +96,7 @@ class PhotoFramePlugin(ContentPlugin):
             
             return canvas
     
-    def generate(self, width, height, tricolor=False):
+    def generate(self, width, height, tricolor=False, grayscale=False):
         """Generate photo frame display"""
         # Get next photo
         photo_path = self.get_next_photo()

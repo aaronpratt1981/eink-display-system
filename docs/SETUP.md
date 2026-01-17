@@ -25,15 +25,26 @@ Detailed setup instructions for the modular plugin-based e-ink display system.
 
 ### Supported Displays
 
+#### Tri-color (B/W/Red)
 | Display | Resolution | Pico Firmware |
 |---------|------------|---------------|
 | 7.5" B | 800 x 480 | `display_800x480.py` |
-| 5.83" | 648 x 480 | `display_648x480.py` |
 | 4.2" B | 400 x 300 | `display_400x300.py` |
-| 3.7" | 480 x 280 | `display_480x280.py` |
 | 2.9" B | 296 x 128 | `display_296x128.py` |
 | 2.66" B | 296 x 152 | `display_296x152.py` |
 | 2.13" B | 250 x 122 | `display_250x122.py` |
+
+#### 4-Level Grayscale
+| Display | Resolution | Pico Firmware |
+|---------|------------|---------------|
+| 4.2" Gray | 400 x 300 | `display_400x300_gray.py` |
+| 3.7" | 480 x 280 | `display_480x280.py` |
+| 2.7" | 264 x 176 | `display_264x176.py` |
+
+#### B&W Only
+| Display | Resolution | Pico Firmware |
+|---------|------------|---------------|
+| 5.83" | 648 x 480 | `display_648x480.py` |
 
 ## 🥧 Raspberry Pi Setup
 
@@ -314,9 +325,17 @@ Each display needs:
     'port': 8080,                # Always 8080
     'width': 800,                # Display width
     'height': 480,               # Display height
-    'tricolor': True             # True for "B" models
+    'tricolor': True,            # True for "B" models (B/W/Red)
+    'grayscale': False           # True for 4-level grayscale displays
 }
 ```
+
+**Display modes:**
+- `tricolor: True` - For B/W/Red displays (7.5" B, 4.2" B, etc.)
+- `grayscale: True` - For 4-level grayscale displays (2.7", 3.7", 4.2" Gray)
+- Both `False` - For B&W only displays
+
+**Note:** `tricolor` and `grayscale` are mutually exclusive.
 
 ### Plugin Configuration
 

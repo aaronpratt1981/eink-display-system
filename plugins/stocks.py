@@ -59,7 +59,7 @@ class StockTickerPlugin(ContentPlugin):
         
         return stocks
     
-    def generate(self, width, height, tricolor=False):
+    def generate(self, width, height, tricolor=False, grayscale=False):
         """Generate stock ticker display"""
         # Create white background
         image = Image.new('RGB', (width, height), 'white')

@@ -30,18 +30,27 @@ class ContentPlugin(ABC):
         self.logger = logging.getLogger(self.__class__.__name__)
     
     @abstractmethod
-    def generate(self, width: int, height: int, tricolor: bool = False) -> Image.Image:
+    def generate(self, width: int, height: int, tricolor: bool = False,
+                 grayscale: bool = False) -> Image.Image:
         """
         Generate content image for display
-        
+
         Args:
             width: Display width in pixels
             height: Display height in pixels
             tricolor: Whether display supports red color (B/W/R)
-            
+            grayscale: Whether display supports 4-level grayscale
+                       (white, light gray, dark gray, black)
+
         Returns:
             PIL Image in RGB mode (will be converted to display format by server)
-            
+
+        Notes:
+            - For B&W displays: use black (0,0,0) and white (255,255,255)
+            - For tricolor displays: also use red (255,0,0)
+            - For grayscale displays: use shades of gray for best results
+              The server will quantize to 4 levels automatically.
+
         Raises:
             Exception: If content generation fails
         """

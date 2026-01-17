@@ -158,17 +158,33 @@ schedule = {
 
 ## 🎨 Supported Displays
 
+### Tri-color Displays (Black/White/Red)
+
 | Display | Resolution | Colors | Size | Best For |
 |---------|------------|--------|------|----------|
 | 7.5" B | 800 x 480 | ⚫⚪🔴 | 96KB* | Newspaper, Photos |
-| 5.83" | 648 x 480 | ⚫⚪ | 39KB | Weather, Dashboard |
 | 4.2" B | 400 x 300 | ⚫⚪🔴 | 30KB* | Calendar, Tasks |
-| 3.7" | 480 x 280 | ⚫⚪ | 17KB | Status Board |
 | 2.9" B | 296 x 128 | ⚫⚪🔴 | 9.5KB* | Compact Info |
 | 2.66" B | 296 x 152 | ⚫⚪🔴 | 11KB* | Mini Display |
 | 2.13" B | 250 x 122 | ⚫⚪🔴 | 7.8KB* | Tiny Status |
 
+### Grayscale Displays (4 levels: White, Light Gray, Dark Gray, Black)
+
+| Display | Resolution | Colors | Size | Best For |
+|---------|------------|--------|------|----------|
+| 4.2" Gray | 400 x 300 | 4-gray | 30KB** | Photos, Documents |
+| 3.7" | 480 x 280 | 4-gray | 34KB** | Photos, Dashboard |
+| 2.7" | 264 x 176 | 4-gray | 12KB** | Status, Info |
+
+### B&W Only Displays
+
+| Display | Resolution | Colors | Size | Best For |
+|---------|------------|--------|------|----------|
+| 7.5" | 800 x 480 | ⚫⚪ | 48KB | Newspaper, Photos |
+| 5.83" | 648 x 480 | ⚫⚪ | 39KB | Weather, Dashboard |
+
 \* Tri-color (BWR) data size. B&W only is half.
+\** Grayscale data size. B&W mode is half.
 
 ## 💡 Example Use Cases
 

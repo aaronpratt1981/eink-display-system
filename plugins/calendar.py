@@ -53,7 +53,7 @@ class CalendarPlugin(ContentPlugin):
         ]
         return events[:self.max_events]
     
-    def generate(self, width, height, tricolor=False):
+    def generate(self, width, height, tricolor=False, grayscale=False):
         """Generate calendar display"""
         # Create white background
         image = Image.new('RGB', (width, height), 'white')

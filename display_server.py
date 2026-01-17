@@ -24,19 +24,29 @@ logger = logging.getLogger(__name__)
 
 class Display:
     """Represents a physical e-ink display"""
-    
-    def __init__(self, name: str, ip: str, port: int, width: int, height: int, 
-                 tricolor: bool = False):
+
+    def __init__(self, name: str, ip: str, port: int, width: int, height: int,
+                 tricolor: bool = False, grayscale: bool = False):
         self.name = name
         self.ip = ip
         self.port = port
         self.width = width
         self.height = height
         self.tricolor = tricolor
+        self.grayscale = grayscale
         self.last_update = None
-    
+
+        # Validate: tricolor and grayscale are mutually exclusive
+        if tricolor and grayscale:
+            raise ValueError(f"Display {name}: tricolor and grayscale are mutually exclusive")
+
     def __repr__(self):
-        colors = "BWR" if self.tricolor else "BW"
+        if self.tricolor:
+            colors = "BWR"
+        elif self.grayscale:
+            colors = "GRAY"
+        else:
+            colors = "BW"
         return f"Display({self.name}, {self.width}x{self.height} {colors} @ {self.ip})"
 
 
@@ -56,10 +66,11 @@ class DisplayServer:
         logger.info("E-ink Display Server - Plugin Architecture")
         logger.info("=" * 70)
     
-    def register_display(self, name: str, ip: str, port: int, 
-                        width: int, height: int, tricolor: bool = False):
+    def register_display(self, name: str, ip: str, port: int,
+                        width: int, height: int, tricolor: bool = False,
+                        grayscale: bool = False):
         """Register a display"""
-        display = Display(name, ip, port, width, height, tricolor)
+        display = Display(name, ip, port, width, height, tricolor, grayscale)
         self.displays[name] = display
         logger.info(f"Registered display: {display}")
     
@@ -119,7 +130,8 @@ class DisplayServer:
                 return None
             
             # Generate content
-            image = plugin.generate(display.width, display.height, display.tricolor)
+            image = plugin.generate(display.width, display.height, display.tricolor,
+                                    display.grayscale)
             
             if image.size != (display.width, display.height):
                 logger.warning(f"Plugin returned wrong size: {image.size}, expected {display.width}x{display.height}")
@@ -202,7 +214,44 @@ class DisplayServer:
                     buffer.append(byte)
             
             return bytes(buffer)
-    
+
+    def convert_to_grayscale(self, image: Image.Image) -> bytes:
+        """
+        Convert PIL image to 4-level grayscale binary format
+
+        Args:
+            image: PIL Image (RGB mode)
+
+        Returns:
+            Binary data with 2 bits per pixel (4 pixels per byte)
+            Levels: 0b00=white, 0b01=light gray, 0b10=dark gray, 0b11=black
+        """
+        # Convert to grayscale
+        gray = image.convert('L')
+        width, height = gray.size
+        pixels = gray.load()
+
+        buffer = []
+        for y in range(height):
+            for x in range(0, width, 4):  # 4 pixels per byte
+                byte = 0
+                for i in range(4):
+                    if x + i < width:
+                        brightness = pixels[x + i, y]
+                        # Map to 4 levels (2 bits)
+                        if brightness > 192:
+                            level = 0b00  # White
+                        elif brightness > 128:
+                            level = 0b01  # Light gray
+                        elif brightness > 64:
+                            level = 0b10  # Dark gray
+                        else:
+                            level = 0b11  # Black
+                        byte |= (level << (6 - i * 2))
+                buffer.append(byte)
+
+        return bytes(buffer)
+
     def send_to_display(self, display_name: str, binary_data: bytes):
         """
         Send binary data to display via HTTP
@@ -258,9 +307,12 @@ class DisplayServer:
             logger.error(f"[{display_name}] Failed to generate content")
             return False
         
-        # Convert to binary
+        # Convert to binary format based on display type
         display = self.displays[display_name]
-        binary_data = self.convert_to_binary(image, display.tricolor)
+        if display.grayscale:
+            binary_data = self.convert_to_grayscale(image)
+        else:
+            binary_data = self.convert_to_binary(image, display.tricolor)
         
         # Save binary for debugging
         binary_path = self.output_dir / f"{display_name}_{plugin_name}.bin"

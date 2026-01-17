@@ -54,7 +54,7 @@ class WeatherPlugin(ContentPlugin):
         except Exception as e:
             raise PluginError(f"Failed to setup Chrome: {e}")
     
-    def generate(self, width, height, tricolor=False):
+    def generate(self, width, height, tricolor=False, grayscale=False):
         """Generate weather display"""
         driver = self.setup_driver()
         

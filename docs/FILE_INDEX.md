@@ -1,6 +1,6 @@
 # Complete File Index - Plugin-Based E-ink Display System
 
-## 📦 All Files (25 total)
+## 📦 All Files (27 total)
 
 ### 🔧 Core System Files (3)
 
@@ -22,16 +22,18 @@
 | `plugins/photo.py` | Photo frame plugin | ✅ Ready (needs photo folder) |
 | `plugins/stocks.py` | Stock ticker plugin | 🔧 Mock data (needs API) |
 
-### 📟 Pico Firmware (7 files in pico/)
+### 📟 Pico Firmware (9 files in pico/)
 
 | File | Display | Resolution | Colors |
 |------|---------|------------|--------|
 | `pico/display_800x480.py` | 7.5" B | 800x480 | B/W or BWR |
 | `pico/display_648x480.py` | 5.83" | 648x480 | B/W |
-| `pico/display_480x280.py` | 3.7" | 480x280 | B/W |
+| `pico/display_480x280.py` | 3.7" | 480x280 | B/W or Grayscale |
 | `pico/display_400x300.py` | 4.2" B | 400x300 | B/W or BWR |
+| `pico/display_400x300_gray.py` | 4.2" Gray | 400x300 | B/W or Grayscale |
 | `pico/display_296x152.py` | 2.66" B | 296x152 | B/W or BWR |
 | `pico/display_296x128.py` | 2.9" B | 296x128 | B/W or BWR |
+| `pico/display_264x176.py` | 2.7" | 264x176 | B/W or Grayscale |
 | `pico/display_250x122.py` | 2.13" B | 250x122 | B/W or BWR |
 
 ### 📚 Documentation (5)
@@ -83,10 +85,12 @@ eink-display-system/
 ├── pico/
 │   ├── display_800x480.py
 │   ├── display_648x480.py
-│   ├── display_480x280.py
+│   ├── display_480x280.py        ← Grayscale support
 │   ├── display_400x300.py
+│   ├── display_400x300_gray.py   ← Grayscale version
 │   ├── display_296x152.py
 │   ├── display_296x128.py
+│   ├── display_264x176.py        ← 2.7" Grayscale
 │   ├── display_250x122.py
 │   └── DISPLAY_FIRMWARE_GUIDE.md
 │
@@ -219,10 +223,10 @@ cp -r plugins plugins.backup
 |----------|-------|------------|
 | Core system | 3 | ~15 KB |
 | Plugins | 7 | ~20 KB |
-| Pico firmware | 7 | ~55 KB |
+| Pico firmware | 9 | ~70 KB |
 | Documentation | 5 | ~50 KB |
 | Project files | 3 | ~2 KB |
-| **Total** | **25** | **~142 KB** |
+| **Total** | **27** | **~157 KB** |
 
 Plus:
 - Virtual environment: ~100 MB
@@ -339,6 +343,6 @@ Before considering setup complete:
 
 ## 🎉 You Have Everything!
 
-All 25 files are ready. Follow docs/SETUP.md to get started!
+All 27 files are ready. Follow docs/SETUP.md to get started!
 
 **Happy displaying!** 📟✨

@@ -101,7 +101,7 @@ class NewspaperPlugin(ContentPlugin):
         
         return image_rotated
     
-    def generate(self, width, height, tricolor=False):
+    def generate(self, width, height, tricolor=False, grayscale=False):
         """Generate newspaper display"""
         # Download if needed
         if not self.cached_image or self.should_update():

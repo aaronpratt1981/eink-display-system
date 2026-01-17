@@ -259,7 +259,17 @@ canvas.paste(photo, (x, y))
 'white' or (255, 255, 255)  # White
 'black' or (0, 0, 0)         # Black
 'red' or (255, 0, 0)         # Red
+
+# For 4-level grayscale displays:
+# Use any grayscale values - server auto-quantizes to 4 levels
+(255, 255, 255)  # White
+(192, 192, 192)  # Light gray (brightness > 192)
+(128, 128, 128)  # Dark gray (brightness 65-128)
+(0, 0, 0)        # Black (brightness < 65)
 ```
+
+**Grayscale tip:** For best results on grayscale displays, use shades of gray
+in your images. The server will automatically quantize to 4 levels.
 
 ## 🔧 Plugin Configuration
 
