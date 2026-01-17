@@ -1,8 +1,21 @@
 """
-Generic E-ink Display Receiver - 400x300
-For Waveshare 4.2" B displays (B&W or tri-color)
+Waveshare E-ink Display Firmware - 400x300
+4.2" Model (4-level Grayscale: White/Light Gray/Dark Gray/Black)
 
-Auto-detects B&W vs tri-color based on data size!
+Runs on Raspberry Pi Pico W. Receives image data via HTTP POST
+and displays it on the connected e-ink screen.
+
+Color Modes:
+  - B&W only:   15,000 bytes (1 bit per pixel)
+  - Grayscale:  30,000 bytes (2 bits per pixel, 4 levels)
+
+Auto-detection: Data format is determined by received byte count.
+
+Pin Configuration:
+  BUSY -> GP13, RST -> GP12, DC -> GP8, CS -> GP9
+  CLK -> GP10, DIN -> GP11, VCC -> 3.3V, GND -> GND
+
+Note: For 4.2" B tri-color displays, use display_400x300.py instead.
 """
 
 import network
@@ -19,7 +32,7 @@ SSID = "YOUR_WIFI_SSID"
 PASSWORD = "YOUR_WIFI_PASSWORD"
 
 USE_STATIC_IP = True
-STATIC_IP = "192.168.1.102"
+STATIC_IP = "192.168.1.106"
 SUBNET_MASK = "255.255.255.0"
 GATEWAY = "192.168.1.1"
 DNS_SERVER = "8.8.8.8"
@@ -30,8 +43,8 @@ SERVER_PORT = 8080
 # Display Configuration
 DISPLAY_WIDTH = 400
 DISPLAY_HEIGHT = 300
-EXPECTED_BYTES_BW = (DISPLAY_WIDTH * DISPLAY_HEIGHT) // 8    # 15,000 bytes
-EXPECTED_BYTES_BWR = EXPECTED_BYTES_BW * 2                    # 30,000 bytes
+EXPECTED_BYTES_BW = (DISPLAY_WIDTH * DISPLAY_HEIGHT) // 8      # 15,000 bytes (1 bpp)
+EXPECTED_BYTES_GRAY = (DISPLAY_WIDTH * DISPLAY_HEIGHT) // 4    # 30,000 bytes (2 bpp)
 
 # Pin Configuration
 EPD_RST_PIN = 12
@@ -39,7 +52,7 @@ EPD_DC_PIN = 8
 EPD_CS_PIN = 9
 EPD_BUSY_PIN = 13
 
-spi = SPI(1, baudrate=4000000, polarity=0, phase=0, 
+spi = SPI(1, baudrate=4000000, polarity=0, phase=0,
           sck=Pin(10), mosi=Pin(11), miso=Pin(12))
 
 rst = Pin(EPD_RST_PIN, Pin.OUT)
@@ -58,26 +71,26 @@ def show_memory():
 def connect_wifi():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    
+
     if not wlan.isconnected():
         print(f"Connecting to WiFi: {SSID}")
         wlan.connect(SSID, PASSWORD)
-        
+
         timeout = 10
         while not wlan.isconnected() and timeout > 0:
             print(".", end="")
             time.sleep(1)
             timeout -= 1
         print()
-    
+
     if wlan.isconnected():
         if USE_STATIC_IP:
             wlan.ifconfig((STATIC_IP, SUBNET_MASK, GATEWAY, DNS_SERVER))
             time.sleep(1)
-        
+
         ip, subnet, gateway, dns = wlan.ifconfig()
         print("=" * 60)
-        print(f"  IP: {ip}:{SERVER_PORT} | Display: {DISPLAY_WIDTH}x{DISPLAY_HEIGHT}")
+        print(f"  IP: {ip}:{SERVER_PORT} | Display: {DISPLAY_WIDTH}x{DISPLAY_HEIGHT} Gray")
         print("=" * 60)
         return ip
     return None
@@ -124,80 +137,104 @@ def epd_reset():
 
 
 def epd_init():
-    print("Initializing 4.2\" B display...")
+    """
+    Initialize 4.2" grayscale display
+
+    Note: Init commands may need adjustment based on Waveshare datasheet.
+    These are placeholder values that may need hardware testing.
+    """
+    print("Initializing 4.2\" grayscale display...")
     epd_reset()
     epd_wait_busy()
-    
+
     epd_send_command(0x01)  # Panel setting
     epd_send_data(0x03)
     epd_send_data(0x00)
     epd_send_data(0x2B)
     epd_send_data(0x2B)
-    
+
     epd_send_command(0x06)  # Booster
     epd_send_data(0x17)
     epd_send_data(0x17)
     epd_send_data(0x17)
-    
+
     epd_send_command(0x04)  # Power on
     epd_wait_busy()
-    
+
     epd_send_command(0x00)  # Panel setting
     epd_send_data(0x8F)
-    
+
     epd_send_command(0x50)  # VCOM
     epd_send_data(0x77)
-    
-    epd_send_command(0x61)  # Resolution
-    epd_send_data(0x01)  # 400
+
+    epd_send_command(0x61)  # Resolution: 400x300
+    epd_send_data(0x01)  # 400 = 0x190
     epd_send_data(0x90)
-    epd_send_data(0x01)  # 300
+    epd_send_data(0x01)  # 300 = 0x12C
     epd_send_data(0x2C)
-    
+
     print("✓ Display initialized")
 
 
-def epd_display_image(image_data):
-    print(f"Displaying ({len(image_data)} bytes)...")
-    
-    is_bw = (len(image_data) == EXPECTED_BYTES_BW)
-    is_bwr = (len(image_data) == EXPECTED_BYTES_BWR)
-    
-    if not (is_bw or is_bwr):
-        print(f"✗ Invalid size: {len(image_data)} bytes")
-        print(f"   Expected: {EXPECTED_BYTES_BW} (B&W) or {EXPECTED_BYTES_BWR} (BWR)")
-        return
-    
-    mode = "B&W" if is_bw else "Tri-color"
-    print(f"  Mode: {mode}")
-    
-    # Clear
-    white = bytearray([0xFF] * 1000)
+def epd_display_bw(data):
+    """Display B&W image (1 bit per pixel)"""
+    print(f"Displaying B&W ({len(data)} bytes)...")
+
+    # Send B&W data
     epd_send_command(0x10)
-    for i in range(0, EXPECTED_BYTES_BW, 1000):
-        epd_send_data_bytes(white)
-    
-    # Write B&W
-    epd_send_command(0x13)
-    bw_data = image_data[:EXPECTED_BYTES_BW] if is_bwr else image_data
-    for i in range(0, len(bw_data), 1000):
-        epd_send_data_bytes(bw_data[i:i+1000])
-    
-    # Write red
-    epd_send_command(0x14)
-    if is_bwr:
-        red_data = image_data[EXPECTED_BYTES_BW:]
-        for i in range(0, len(red_data), 1000):
-            epd_send_data_bytes(red_data[i:i+1000])
-    else:
-        for i in range(0, EXPECTED_BYTES_BW, 1000):
-            epd_send_data_bytes(white)
-    
+    for i in range(0, len(data), 1000):
+        epd_send_data_bytes(data[i:i+1000])
+
     # Refresh
     epd_send_command(0x12)
     time.sleep_ms(100)
     epd_wait_busy()
-    print("✓ Displayed!")
+    print("✓ B&W displayed!")
+
+
+def epd_display_gray(data):
+    """
+    Display 4-level grayscale image (2 bits per pixel)
+
+    Grayscale levels:
+    - 0b00 = White
+    - 0b01 = Light gray
+    - 0b10 = Dark gray
+    - 0b11 = Black
+
+    Note: Grayscale init/LUT may need adjustment based on Waveshare datasheet.
+    This is a placeholder implementation that may need hardware testing.
+    """
+    print(f"Displaying grayscale ({len(data)} bytes)...")
+
+    # TODO: Grayscale displays may require different LUT settings
+    # The exact commands depend on the specific Waveshare model
+    # This implementation sends data but may need init adjustments
+
+    # Send grayscale data (2 bits per pixel packed into bytes)
+    epd_send_command(0x10)
+    for i in range(0, len(data), 1000):
+        epd_send_data_bytes(data[i:i+1000])
+
+    # Refresh
+    epd_send_command(0x12)
+    time.sleep_ms(100)
+    epd_wait_busy()
+    print("✓ Grayscale displayed!")
+
+
+def epd_display_image(image_data):
+    """Auto-detect and display B&W or grayscale image"""
+    is_bw = len(image_data) == EXPECTED_BYTES_BW
+    is_gray = len(image_data) == EXPECTED_BYTES_GRAY
+
+    if is_bw:
+        epd_display_bw(image_data)
+    elif is_gray:
+        epd_display_gray(image_data)
+    else:
+        print(f"✗ Invalid size: {len(image_data)} bytes")
+        print(f"  Expected B&W: {EXPECTED_BYTES_BW} or Gray: {EXPECTED_BYTES_GRAY}")
 
 
 def epd_sleep():
@@ -213,7 +250,7 @@ def handle_request(conn, addr):
         content_length = 0
         headers_done = False
         body = b""
-        
+
         while not headers_done:
             chunk = conn.recv(512)
             if not chunk:
@@ -224,43 +261,43 @@ def handle_request(conn, addr):
                 header_end = request.find(b'\r\n\r\n')
                 headers = request[:header_end]
                 body = request[header_end + 4:]
-                
+
                 for line in headers.split(b'\r\n'):
                     if line.startswith(b'Content-Length:'):
                         content_length = int(line.split(b':')[1].strip())
                         break
-                
+
                 if b'POST /update' not in headers:
                     response = (
                         "HTTP/1.1 200 OK\r\n\r\n"
-                        f"Generic E-ink ({DISPLAY_WIDTH}x{DISPLAY_HEIGHT})\n"
-                        f"B&W: {EXPECTED_BYTES_BW}B or BWR: {EXPECTED_BYTES_BWR}B\n"
+                        f"Generic E-ink ({DISPLAY_WIDTH}x{DISPLAY_HEIGHT} Grayscale)\n"
+                        f"B&W: {EXPECTED_BYTES_BW}B or Gray: {EXPECTED_BYTES_GRAY}B\n"
                         "POST to /update"
                     )
                     conn.send(response.encode())
                     return
-        
+
         if not headers_done or content_length == 0:
             return
-        
+
         while len(body) < content_length:
             chunk = conn.recv(min(1024, content_length - len(body)))
             if not chunk:
                 break
             body += chunk
-        
+
         conn.send(b"HTTP/1.1 200 OK\r\n\r\nOK")
-        
+
         del request, headers
         gc.collect()
-        
+
         epd_display_image(body)
         time.sleep(2)
         epd_sleep()
-        
+
         del body
         gc.collect()
-        
+
     except Exception as e:
         print(f"✗ Error: {e}")
     finally:
@@ -277,10 +314,10 @@ def start_server():
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(addr)
     s.listen(1)
-    
+
     print("✓ Server running")
     show_memory()
-    
+
     while True:
         try:
             conn, addr = s.accept()
@@ -291,9 +328,9 @@ def start_server():
 
 
 def main():
-    print(f"\nGeneric Display ({DISPLAY_WIDTH}x{DISPLAY_HEIGHT})")
-    print("Auto-detects B&W or Tri-color!\n")
-    
+    print(f"\nGeneric Display ({DISPLAY_WIDTH}x{DISPLAY_HEIGHT} Grayscale)")
+    print("Auto-detects B&W or Grayscale!\n")
+
     if connect_wifi():
         epd_init()
         start_server()

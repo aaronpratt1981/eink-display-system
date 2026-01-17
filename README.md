@@ -93,7 +93,7 @@ schedule = {
 ### 3. Setup Pico Display
 
 1. Flash MicroPython to Pico W
-2. Upload `pico/display_800x480.py` or a file for another sized screen as `main.py`
+2. Upload `waveshare-screens/display_800x480.py` or a file for another sized screen as `main.py`
 3. Edit WiFi credentials in `main.py`
 4. Reboot and note IP address
 
@@ -287,7 +287,7 @@ schedule = {
 
 - **[PLUGIN_GUIDE.md](plugins/PLUGIN_GUIDE.md)** - Complete plugin development guide
 - **[SETUP.md](docs/SETUP.md)** - Detailed installation guide
-- **[DISPLAY_FIRMWARE_GUIDE.md](pico/DISPLAY_FIRMWARE_GUIDE.md)** - All display models and firmware
+- **[DISPLAY_FIRMWARE_GUIDE.md](waveshare-screens/DISPLAY_FIRMWARE_GUIDE.md)** - All display models and firmware
 
 
 ## 🐛 Troubleshooting

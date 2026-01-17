@@ -22,19 +22,19 @@
 | `plugins/photo.py` | Photo frame plugin | ✅ Ready (needs photo folder) |
 | `plugins/stocks.py` | Stock ticker plugin | 🔧 Mock data (needs API) |
 
-### 📟 Pico Firmware (9 files in pico/)
+### 📟 Pico Firmware (9 files in waveshare-screens/)
 
 | File | Display | Resolution | Colors |
 |------|---------|------------|--------|
-| `pico/display_800x480.py` | 7.5" B | 800x480 | B/W or BWR |
-| `pico/display_648x480.py` | 5.83" | 648x480 | B/W |
-| `pico/display_480x280.py` | 3.7" | 480x280 | B/W or Grayscale |
-| `pico/display_400x300.py` | 4.2" B | 400x300 | B/W or BWR |
-| `pico/display_400x300_gray.py` | 4.2" Gray | 400x300 | B/W or Grayscale |
-| `pico/display_296x152.py` | 2.66" B | 296x152 | B/W or BWR |
-| `pico/display_296x128.py` | 2.9" B | 296x128 | B/W or BWR |
-| `pico/display_264x176.py` | 2.7" | 264x176 | B/W or Grayscale |
-| `pico/display_250x122.py` | 2.13" B | 250x122 | B/W or BWR |
+| `waveshare-screens/display_800x480.py` | 7.5" B | 800x480 | B/W or BWR |
+| `waveshare-screens/display_648x480.py` | 5.83" | 648x480 | B/W |
+| `waveshare-screens/display_480x280.py` | 3.7" | 480x280 | B/W or Grayscale |
+| `waveshare-screens/display_400x300.py` | 4.2" B | 400x300 | B/W or BWR |
+| `waveshare-screens/display_400x300_gray.py` | 4.2" Gray | 400x300 | B/W or Grayscale |
+| `waveshare-screens/display_296x152.py` | 2.66" B | 296x152 | B/W or BWR |
+| `waveshare-screens/display_296x128.py` | 2.9" B | 296x128 | B/W or BWR |
+| `waveshare-screens/display_264x176.py` | 2.7" | 264x176 | B/W or Grayscale |
+| `waveshare-screens/display_250x122.py` | 2.13" B | 250x122 | B/W or BWR |
 
 ### 📚 Documentation (5)
 
@@ -44,7 +44,7 @@
 | `docs/FILE_INDEX.md` | Complete file listing |
 | `docs/SETUP.md` | Complete installation guide |
 | `plugins/PLUGIN_GUIDE.md` | How to create plugins |
-| `pico/DISPLAY_FIRMWARE_GUIDE.md` | Display firmware reference |
+| `waveshare-screens/DISPLAY_FIRMWARE_GUIDE.md` | Display firmware reference |
 
 ### 📄 Project Files (3)
 
@@ -82,7 +82,7 @@ eink-display-system/
 │   ├── stocks.py
 │   └── PLUGIN_GUIDE.md
 │
-├── pico/
+├── waveshare-screens/
 │   ├── display_800x480.py
 │   ├── display_648x480.py
 │   ├── display_480x280.py        ← Grayscale support
@@ -118,7 +118,7 @@ eink-display-system/
 
 ### Step 2: Setup Pico Displays
 - [ ] Flash MicroPython to Pico W
-- [ ] Upload `pico/display_XXXxYYY.py` as `main.py`
+- [ ] Upload `waveshare-screens/display_XXXxYYY.py` as `main.py`
 - [ ] Edit WiFi credentials in Pico's `main.py`
 - [ ] Note IP address from serial output
 - [ ] Update IP in Pi's `config.py`
@@ -144,7 +144,7 @@ eink-display-system/
 → Read **plugins/PLUGIN_GUIDE.md** for plugin development
 
 **Setting up displays?**
-→ Read **pico/DISPLAY_FIRMWARE_GUIDE.md** for firmware setup
+→ Read **waveshare-screens/DISPLAY_FIRMWARE_GUIDE.md** for firmware setup
 
 **Just want overview?**
 → Read **README.md** for project overview
@@ -335,7 +335,7 @@ Before considering setup complete:
 3. **Read guides:**
    - docs/SETUP.md for installation
    - plugins/PLUGIN_GUIDE.md for development
-   - pico/DISPLAY_FIRMWARE_GUIDE.md for display setup
+   - waveshare-screens/DISPLAY_FIRMWARE_GUIDE.md for display setup
 
 4. **Open issue:** Include logs, config (remove IPs), error messages
 

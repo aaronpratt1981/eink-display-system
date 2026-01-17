@@ -23,7 +23,7 @@ The existing firmware auto-detects B&W vs tri-color based on data size. **B&W on
 
 The **4-level grayscale displays (2.7", 3.7", and 4.2") require significant changes** - new/updated firmware, server modifications, and documentation updates.
 
-**Important:** The existing `pico/display_480x280.py` (3.7") is incorrectly configured as B&W but the hardware is actually 4-level grayscale. This firmware needs to be updated.
+**Important:** The existing `waveshare-screens/display_480x280.py` (3.7") is incorrectly configured as B&W but the hardware is actually 4-level grayscale. This firmware needs to be updated.
 
 **Auto-detection:** Like tri-color displays that auto-detect B&W vs BWR based on data size, grayscale firmware should auto-detect B&W vs grayscale data, allowing users to send simple B&W content when grayscale isn't needed.
 
@@ -35,21 +35,21 @@ The following displays use the same resolution as existing firmware but are B&W 
 
 ### 2.13" B&W (250x122)
 
-- [ ] **Verify** existing `pico/display_250x122.py` works with B&W-only hardware
+- [ ] **Verify** existing `waveshare-screens/display_250x122.py` works with B&W-only hardware
 - [ ] **Test** by setting `tricolor: False` in config and sending B&W data
 - [ ] **Verify** init commands are compatible (may differ from tri-color "B" model)
 - [ ] **Document** any differences in behavior
 
 ### 2.66" B&W (296x152)
 
-- [ ] **Verify** existing `pico/display_296x152.py` works with B&W-only hardware
+- [ ] **Verify** existing `waveshare-screens/display_296x152.py` works with B&W-only hardware
 - [ ] **Test** by setting `tricolor: False` in config
 - [ ] **Verify** init commands are compatible
 - [ ] **Document** any differences
 
 ### 2.9" B&W (296x128)
 
-- [ ] **Verify** existing `pico/display_296x128.py` works with B&W-only hardware
+- [ ] **Verify** existing `waveshare-screens/display_296x128.py` works with B&W-only hardware
 - [ ] **Test** by setting `tricolor: False` in config
 - [ ] **Verify** init commands are compatible
 - [ ] **Document** any differences
@@ -61,7 +61,7 @@ The following displays use the same resolution as existing firmware but are B&W 
 
 ### 7.5" B&W (800x480)
 
-- [ ] **Verify** existing `pico/display_800x480.py` works with B&W-only hardware
+- [ ] **Verify** existing `waveshare-screens/display_800x480.py` works with B&W-only hardware
 - [ ] **Test** by setting `tricolor: False` in config
 - [ ] **Verify** init commands are compatible (may differ from "B" tri-color model)
 - [ ] **Document** any differences
@@ -109,9 +109,9 @@ def epd_display(img_data):
 
 ### 2.7" Grayscale (264x176)
 
-#### Pico Firmware (`pico/display_264x176.py`)
+#### Pico Firmware (`waveshare-screens/display_264x176.py`)
 
-- [x] **Create** new firmware file `pico/display_264x176.py` ✅ Done
+- [x] **Create** new firmware file `waveshare-screens/display_264x176.py` ✅ Done
 - [x] **Set** display dimensions: `DISPLAY_WIDTH = 264`, `DISPLAY_HEIGHT = 176` ✅ Done
 - [x] **Calculate** expected bytes: ✅ Done
   - B&W: `(264 * 176) / 8 = 5,808 bytes`
@@ -132,11 +132,11 @@ def epd_display(img_data):
 
 ### 3.7" Grayscale (480x280) - UPDATE EXISTING
 
-**Note:** The existing `pico/display_480x280.py` was incorrectly configured as B&W only. It has been updated to support grayscale with B&W auto-detection.
+**Note:** The existing `waveshare-screens/display_480x280.py` was incorrectly configured as B&W only. It has been updated to support grayscale with B&W auto-detection.
 
-#### Pico Firmware (`pico/display_480x280.py` - Update)
+#### Pico Firmware (`waveshare-screens/display_480x280.py` - Update)
 
-- [x] **Backup** existing `pico/display_480x280.py` ✅ Original preserved in git
+- [x] **Backup** existing `waveshare-screens/display_480x280.py` ✅ Original preserved in git
 - [x] **Update** expected bytes calculations: ✅ Done
   - B&W: `(480 * 280) / 8 = 16,800 bytes`
   - Grayscale: `(480 * 280) / 4 = 33,600 bytes`
@@ -159,9 +159,9 @@ def epd_display(img_data):
 
 ### 4.2" Grayscale (400x300)
 
-#### Pico Firmware (`pico/display_400x300_gray.py`)
+#### Pico Firmware (`waveshare-screens/display_400x300_gray.py`)
 
-- [x] **Create** new firmware file `pico/display_400x300_gray.py` ✅ Done
+- [x] **Create** new firmware file `waveshare-screens/display_400x300_gray.py` ✅ Done
 - [x] **Set** display dimensions: `DISPLAY_WIDTH = 400`, `DISPLAY_HEIGHT = 300` ✅ Done
 - [x] **Calculate** expected bytes: ✅ Done
   - B&W: `(400 * 300) / 8 = 15,000 bytes`
@@ -328,7 +328,7 @@ displays = {
 - [x] **Add** grayscale display configuration section ✅ Done
 - [x] **Add** grayscale-specific setup instructions ✅ Done
 
-### pico/DISPLAY_FIRMWARE_GUIDE.md
+### waveshare-screens/DISPLAY_FIRMWARE_GUIDE.md
 
 - [x] **Add** new firmware files to table ✅ Done
 - [x] **Add** section explaining grayscale displays ✅ Done
@@ -411,5 +411,5 @@ displays = {
 - Grayscale displays are different from tri-color - they cannot show red
 - Some displays support both B&W and grayscale modes via different LUTs
 - Memory constraints on Pico may limit grayscale support on larger displays
-- The existing 3.7" firmware (`pico/display_480x280.py`) was incorrectly implemented as B&W-only
+- The existing 3.7" firmware (`waveshare-screens/display_480x280.py`) was incorrectly implemented as B&W-only
 - All grayscale firmware should support receiving B&W data for simpler content (auto-detection)

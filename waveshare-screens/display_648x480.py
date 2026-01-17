@@ -1,9 +1,16 @@
 """
-Generic E-ink Display Receiver - 648x480
-For Waveshare 5.83" displays (B&W)
+Waveshare E-ink Display Firmware - 648x480
+5.83" Model (Black/White only)
 
-This firmware is content-agnostic - it receives any binary
-data and displays it. Works with all plugins!
+Runs on Raspberry Pi Pico W. Receives image data via HTTP POST
+and displays it on the connected e-ink screen.
+
+Color Mode:
+  - B&W only: 38,880 bytes (1 bit per pixel)
+
+Pin Configuration:
+  BUSY -> GP13, RST -> GP12, DC -> GP8, CS -> GP9
+  CLK -> GP10, DIN -> GP11, VCC -> 3.3V, GND -> GND
 """
 
 import network

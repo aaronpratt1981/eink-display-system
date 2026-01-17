@@ -82,7 +82,7 @@ cd eink-display-system
 
 # Verify files
 ls -la
-# Should see: main.py, display_server.py, config_example.py, plugins/, pico/
+# Should see: main.py, display_server.py, config_example.py, plugins/, waveshare-screens/
 ```
 
 ### Step 4: Setup Python Environment
@@ -271,8 +271,8 @@ sudo apt-get install thonny
 3. **Select interpreter:** 
    - Bottom right → "MicroPython (Raspberry Pi Pico)"
 4. **Open firmware file:**
-   - For 800x480: Open `pico/display_800x480.py`
-   - For 648x480: Open `pico/display_648x480.py`
+   - For 800x480: Open `waveshare-screens/display_800x480.py`
+   - For 648x480: Open `waveshare-screens/display_648x480.py`
 
 5. **Configure WiFi:**
    ```python
@@ -635,7 +635,7 @@ gc.mem_free()
 ## 📚 Next Steps
 
 - **[Create custom plugins](../plugins/PLUGIN_GUIDE.md)** - Build your own content
-- **[Display firmware guide](../pico/DISPLAY_FIRMWARE_GUIDE.md)** - Setup additional displays
+- **[Display firmware guide](../waveshare-screens/DISPLAY_FIRMWARE_GUIDE.md)** - Setup additional displays
 - **Add more displays** - Scale to 7 displays
 - **Optimize schedules** - Fine-tune update frequency
 - **Share plugins** - Contribute back!

@@ -1,10 +1,19 @@
 """
-Generic E-ink Display Receiver - 480x280
-For Waveshare 3.7" displays (4-level grayscale)
+Waveshare E-ink Display Firmware - 264x176
+2.7" Model (4-level Grayscale: White/Light Gray/Dark Gray/Black)
 
-Auto-detects B&W vs Grayscale based on data size!
-- B&W mode: 16,800 bytes (1 bit per pixel)
-- Grayscale mode: 33,600 bytes (2 bits per pixel, 4 levels)
+Runs on Raspberry Pi Pico W. Receives image data via HTTP POST
+and displays it on the connected e-ink screen.
+
+Color Modes:
+  - B&W only:   5,808 bytes (1 bit per pixel)
+  - Grayscale:  11,616 bytes (2 bits per pixel, 4 levels)
+
+Auto-detection: Data format is determined by received byte count.
+
+Pin Configuration:
+  BUSY -> GP13, RST -> GP12, DC -> GP8, CS -> GP9
+  CLK -> GP10, DIN -> GP11, VCC -> 3.3V, GND -> GND
 """
 
 import network
@@ -21,7 +30,7 @@ SSID = "YOUR_WIFI_SSID"
 PASSWORD = "YOUR_WIFI_PASSWORD"
 
 USE_STATIC_IP = True
-STATIC_IP = "192.168.1.103"
+STATIC_IP = "192.168.1.105"
 SUBNET_MASK = "255.255.255.0"
 GATEWAY = "192.168.1.1"
 DNS_SERVER = "8.8.8.8"
@@ -29,17 +38,17 @@ DNS_SERVER = "8.8.8.8"
 SERVER_PORT = 8080
 # ==================================
 
-DISPLAY_WIDTH = 480
-DISPLAY_HEIGHT = 280
-EXPECTED_BYTES_BW = (DISPLAY_WIDTH * DISPLAY_HEIGHT) // 8      # 16,800 bytes (1 bpp)
-EXPECTED_BYTES_GRAY = (DISPLAY_WIDTH * DISPLAY_HEIGHT) // 4    # 33,600 bytes (2 bpp)
+DISPLAY_WIDTH = 264
+DISPLAY_HEIGHT = 176
+EXPECTED_BYTES_BW = (DISPLAY_WIDTH * DISPLAY_HEIGHT) // 8      # 5,808 bytes (1 bpp)
+EXPECTED_BYTES_GRAY = (DISPLAY_WIDTH * DISPLAY_HEIGHT) // 4    # 11,616 bytes (2 bpp)
 
 EPD_RST_PIN = 12
 EPD_DC_PIN = 8
 EPD_CS_PIN = 9
 EPD_BUSY_PIN = 13
 
-spi = SPI(1, baudrate=4000000, polarity=0, phase=0, 
+spi = SPI(1, baudrate=4000000, polarity=0, phase=0,
           sck=Pin(10), mosi=Pin(11), miso=Pin(12))
 
 rst = Pin(EPD_RST_PIN, Pin.OUT)
@@ -57,7 +66,7 @@ def show_memory():
 def connect_wifi():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
-    
+
     if not wlan.isconnected():
         print(f"Connecting to {SSID}...")
         wlan.connect(SSID, PASSWORD)
@@ -67,7 +76,7 @@ def connect_wifi():
             time.sleep(1)
             timeout -= 1
         print()
-    
+
     if wlan.isconnected():
         if USE_STATIC_IP:
             wlan.ifconfig((STATIC_IP, SUBNET_MASK, GATEWAY, DNS_SERVER))
@@ -110,36 +119,48 @@ def epd_reset():
 
 
 def epd_init():
-    print("Initializing 3.7\" display...")
+    """
+    Initialize 2.7" grayscale display
+
+    Note: Init commands may need adjustment based on Waveshare datasheet.
+    These are placeholder values that may need hardware testing.
+    """
+    print("Initializing 2.7\" grayscale display...")
     epd_reset()
     epd_wait_busy()
-    
-    epd_send_command(0x01)  # Panel setting
+
+    # Panel setting
+    epd_send_command(0x01)
     epd_send_data(0x03)
     epd_send_data(0x00)
     epd_send_data(0x2B)
     epd_send_data(0x2B)
-    
-    epd_send_command(0x06)  # Booster
+
+    # Booster soft start
+    epd_send_command(0x06)
     epd_send_data(0x17)
     epd_send_data(0x17)
     epd_send_data(0x17)
-    
+
+    # Power on
     epd_send_command(0x04)
     epd_wait_busy()
-    
+
+    # Panel setting
     epd_send_command(0x00)
     epd_send_data(0x8F)
-    
+
+    # VCOM and data interval
     epd_send_command(0x50)
     epd_send_data(0x77)
-    
-    epd_send_command(0x61)  # Resolution
-    epd_send_data(0x01)  # 480
-    epd_send_data(0xE0)
-    epd_send_data(0x01)  # 280
-    epd_send_data(0x18)
-    
+
+    # Resolution setting: 264x176
+    epd_send_command(0x61)
+    epd_send_data(0x01)  # 264 = 0x108
+    epd_send_data(0x08)
+    epd_send_data(0x00)  # 176 = 0xB0
+    epd_send_data(0xB0)
+
     print("✓ Initialized")
 
 
@@ -215,7 +236,7 @@ def handle_request(conn, addr):
         content_length = 0
         headers_done = False
         body = b""
-        
+
         while not headers_done:
             chunk = conn.recv(512)
             if not chunk:
@@ -226,30 +247,30 @@ def handle_request(conn, addr):
                 header_end = request.find(b'\r\n\r\n')
                 headers = request[:header_end]
                 body = request[header_end + 4:]
-                
+
                 for line in headers.split(b'\r\n'):
                     if line.startswith(b'Content-Length:'):
                         content_length = int(line.split(b':')[1].strip())
                         break
-                
+
                 if b'POST /update' not in headers:
-                    conn.send(b"HTTP/1.1 200 OK\r\n\r\nGeneric E-ink Display\nPOST to /update")
+                    conn.send(b"HTTP/1.1 200 OK\r\n\r\nGeneric E-ink Display (2.7\" Gray)\nPOST to /update")
                     return
-        
+
         while len(body) < content_length:
             chunk = conn.recv(min(1024, content_length - len(body)))
             if not chunk:
                 break
             body += chunk
-        
+
         conn.send(b"HTTP/1.1 200 OK\r\n\r\nOK")
         del request, headers
         gc.collect()
-        
+
         epd_display_image(body)
         time.sleep(2)
         epd_sleep()
-        
+
         del body
         gc.collect()
     except Exception as e:
@@ -268,10 +289,10 @@ def start_server():
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind(addr)
     s.listen(1)
-    
+
     print("✓ Server running")
     show_memory()
-    
+
     while True:
         try:
             conn, addr = s.accept()
@@ -282,7 +303,7 @@ def start_server():
 
 
 def main():
-    print(f"\nGeneric Display ({DISPLAY_WIDTH}x{DISPLAY_HEIGHT})\n")
+    print(f"\nGeneric Display ({DISPLAY_WIDTH}x{DISPLAY_HEIGHT} Grayscale)\n")
     if connect_wifi():
         epd_init()
         start_server()

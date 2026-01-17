@@ -1,7 +1,19 @@
 """
-Generic E-ink Display Receiver - 296x128
-For Waveshare 2.9" B displays (B&W or tri-color)
-Auto-detects B&W vs tri-color!
+Waveshare E-ink Display Firmware - 296x128
+2.9" B Model (Tri-color: Black/White/Red)
+
+Runs on Raspberry Pi Pico W. Receives image data via HTTP POST
+and displays it on the connected e-ink screen.
+
+Color Modes:
+  - B&W only:   4,736 bytes (1 bit per pixel)
+  - Tri-color:  9,472 bytes (B&W + red channel)
+
+Auto-detection: Data format is determined by received byte count.
+
+Pin Configuration:
+  BUSY -> GP13, RST -> GP12, DC -> GP8, CS -> GP9
+  CLK -> GP10, DIN -> GP11, VCC -> 3.3V, GND -> GND
 """
 
 import network, socket, time, gc

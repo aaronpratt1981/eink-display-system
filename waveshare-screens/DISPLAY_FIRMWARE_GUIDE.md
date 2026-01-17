@@ -18,7 +18,7 @@ Complete guide for all Pico display firmwares with auto-detection support.
 
 ## 📟 All 9 Display Firmwares
 
-All firmware files are located in the `pico/` directory.
+All firmware files are located in the `waveshare-screens/` directory.
 
 ### Tri-color Displays (B/W/Red)
 
