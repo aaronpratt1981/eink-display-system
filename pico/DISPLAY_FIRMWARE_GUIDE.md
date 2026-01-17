@@ -12,6 +12,8 @@ Complete guide for all Pico display firmwares with auto B&W/tri-color detection.
 
 ## 📟 All 7 Display Firmwares
 
+All firmware files are located in the `pico/` directory.
+
 | Display | Resolution | File | Data Size |
 |---------|------------|------|-----------|
 | 7.5" B | 800 x 480 | `display_800x480.py` | 48KB (B&W) or 96KB (BWR) |

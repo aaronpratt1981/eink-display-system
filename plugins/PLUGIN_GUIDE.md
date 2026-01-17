@@ -29,11 +29,7 @@ Displayed on e-ink screen
 ```python
 # plugins/hello.py
 
-from pathlib import Path
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from plugin_base import ContentPlugin
+from .base import ContentPlugin
 from PIL import Image, ImageDraw, ImageFont
 
 
@@ -104,7 +100,7 @@ That's it! Your plugin is live! 🎉
 All plugins inherit from `ContentPlugin`:
 
 ```python
-from plugin_base import ContentPlugin
+from .base import ContentPlugin
 
 class MyPlugin(ContentPlugin):
     def __init__(self, config=None):
@@ -597,7 +593,7 @@ image.save('test.png')
 - **PIL Documentation**: https://pillow.readthedocs.io/
 - **Font Locations**: `/usr/share/fonts/truetype/`
 - **Example Plugins**: See `plugins/` directory
-- **Plugin Base**: See `plugin_base.py`
+- **Plugin Base**: See `plugins/base.py`
 
 ## 🤝 Sharing Plugins
 

@@ -29,8 +29,11 @@ Detailed setup instructions for the modular plugin-based e-ink display system.
 |---------|------------|---------------|
 | 7.5" B | 800 x 480 | `display_800x480.py` |
 | 5.83" | 648 x 480 | `display_648x480.py` |
-| 4.2" B | 400 x 300 | (create from template) |
-| Others | Various | (create from template) |
+| 4.2" B | 400 x 300 | `display_400x300.py` |
+| 3.7" | 480 x 280 | `display_480x280.py` |
+| 2.9" B | 296 x 128 | `display_296x128.py` |
+| 2.66" B | 296 x 152 | `display_296x152.py` |
+| 2.13" B | 250 x 122 | `display_250x122.py` |
 
 ## 🥧 Raspberry Pi Setup
 
@@ -486,7 +489,7 @@ sudo systemctl start eink-displays
 
 ## 🔌 Adding Plugins
 
-See **[PLUGIN_GUIDE.md](PLUGIN_GUIDE.md)** for complete guide.
+See **[PLUGIN_GUIDE.md](../plugins/PLUGIN_GUIDE.md)** for complete guide.
 
 **Quick example:**
 
@@ -612,8 +615,8 @@ gc.mem_free()
 
 ## 📚 Next Steps
 
-- **[Create custom plugins](PLUGIN_GUIDE.md)** - Build your own content
-- **[Migrate old system](MIGRATION_GUIDE.md)** - Upgrade from unified server
+- **[Create custom plugins](../plugins/PLUGIN_GUIDE.md)** - Build your own content
+- **[Display firmware guide](../pico/DISPLAY_FIRMWARE_GUIDE.md)** - Setup additional displays
 - **Add more displays** - Scale to 7 displays
 - **Optimize schedules** - Fine-tune update frequency
 - **Share plugins** - Contribute back!

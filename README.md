@@ -123,7 +123,7 @@ Create a plugin in 3 steps:
 
 ```python
 # plugins/hello.py
-from plugin_base import ContentPlugin
+from .base import ContentPlugin
 from PIL import Image, ImageDraw
 
 class HelloWorldPlugin(ContentPlugin):
@@ -154,7 +154,7 @@ schedule = {
 }
 ```
 
-**See [PLUGIN_GUIDE.md](PLUGIN_GUIDE.md) for complete documentation!**
+**See [PLUGIN_GUIDE.md](plugins/PLUGIN_GUIDE.md) for complete documentation!**
 
 ## 🎨 Supported Displays
 
@@ -269,9 +269,9 @@ schedule = {
 
 ## 📚 Documentation
 
-- **[PLUGIN_GUIDE.md](PLUGIN_GUIDE.md)** - Complete plugin development guide
+- **[PLUGIN_GUIDE.md](plugins/PLUGIN_GUIDE.md)** - Complete plugin development guide
 - **[SETUP.md](docs/SETUP.md)** - Detailed installation guide
-- **[DISPLAYS.md](docs/DISPLAYS.md)** - All display models
+- **[DISPLAY_FIRMWARE_GUIDE.md](pico/DISPLAY_FIRMWARE_GUIDE.md)** - All display models and firmware
 
 
 ## 🐛 Troubleshooting
@@ -356,4 +356,4 @@ MIT License - see [LICENSE](LICENSE)
 
 **Built with ❤️ for the e-ink community**
 
-[Create an issue](https://github.com/aaronpratt1981/eink-display-system/issues) • [Plugin guide](PLUGIN_GUIDE.md)
+[Create an issue](https://github.com/aaronpratt1981/eink-display-system/issues) • [Plugin guide](plugins/PLUGIN_GUIDE.md)
